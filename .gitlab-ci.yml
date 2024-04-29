@@ -1,0 +1,32 @@
+image: node:16.14.0
+
+stages:
+  - build
+  - deploy
+
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+  - ./dashboard/node_modules/
+  - ./dashboard/dist/
+
+before_script:
+  - npm install -g @angular/cli
+
+build:
+  stage: build
+  script:
+    - cd dashboard
+    - npm install --legacy-peer-deps
+    - ng build
+  only: ['ch-sprint4']
+
+deploy:
+  image: python:latest
+  stage: deploy
+  before_script:
+    - pip install awscli
+  script:
+    - aws s3 sync ./dashboard/dist/project/ s3://project-staging-web/ 
+  only: ['ch-sprint4']
